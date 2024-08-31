@@ -56,3 +56,5 @@ for index, ref in enumerate(unique_items):
 
 
 # https://www.kaggle.com/datasets/nafishamoin/new-bangladeshi-crop-disease
+
+# key: 7fac3a9a230ad3455c9ffc71f1d99f94

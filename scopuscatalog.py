@@ -12,7 +12,7 @@ pybliometrics.scopus.init()
 # NOTE: config file for pybliometrics is stored in $HOME/.config/pybliometrics.cfg
 
 if __name__ == "__main__":
-    for year in range(2020, 2024):
+    for year in range(2020, 2021):
         # make the folder to store the data for the year
         current_path = os.getcwd()
         folder_path = os.path.join(current_path, "output", str(year))
@@ -20,12 +20,29 @@ if __name__ == "__main__":
             os.makedirs(folder_path)
 
         # get the results
-        x = ScopusSearch(
-            f'ABS ( "crop disease dataset" ) OR ABS ( "plant disease dataset" ) OR TITLE ( "plant disease dataset"" ) OR TITLE ( "crop disease dataset" ) OR SRCTITLE ( "agriculture" ) OR SRCTITLE ( "engineering" ) AND SUBJAREA ( AGRI ) OR SUBJAREA ( ENGI ) AND PUBYEAR = {year} AND NOT SUBJAREA (medi ) AND NOT SUBJAREA ( immu ) AND NOT SUBJAREA ( BIOC ) AND NOT SUBJAREA ( busi )',
-            view="STANDARD")
-            #  f'ABS ( "crop disease dataset" ) OR ABS ( "plant disease dataset" ) OR TITLE ( "plant disease dataset"" ) OR TITLE ( "crop disease dataset" ) AND TITLE ( "material" ) OR ABS ( "material" ) OR SRCTITLE ( "material" ) AND SUBJAREA ( mate ) AND DOCTYPE ( "AR" ) AND SRCTYPE( j ) AND PUBYEAR = {year} AND NOT SUBJAREA (medi ) AND NOT SUBJAREA ( immu ) AND NOT SUBJAREA ( BIOC ) AND NOT SUBJAREA ( busi )',
-            # view="STANDARD")
+        # x = ScopusSearch(
+        #     f'ABS ( "crop disease" ) OR ABS ( "plant disease" ) OR TITLE ( "disease" ) OR TITLE ( "dataset" ) AND ABS ( "dataset" ) OR ABS ( "data" ) AND SUBJAREA ( agri ) OR SUBJAREA ( engi ) AND DOCTYPE ( "AR" ) OR DOCTYPE ( "CP" ) OR DOCTYPE ( "CR" ) OR DOCTYPE ( "RE" ) AND PUBYEAR = {year} AND NOT SUBJAREA (medi ) AND NOT SUBJAREA ( immu ) AND NOT SUBJAREA ( busi )',
+        #     view="STANDARD")
+        x=ScopusSearch(
+            f'ABS ( "plant disease" OR "crop disease" AND "dataset" OR "data" OR "disease detection" OR "disease classification" OR "disease segmentation") '
+            f'OR TITLE ( "plant disease" OR "crop disease" AND "dataset" OR "data" ) '
+            f'AND SUBJAREA ( agri OR engi OR envi OR comp OR bioc ) '
+            f'AND DOCTYPE ( "AR" OR "CP" OR "CR" OR "RE" ) '
+            f'AND PUBYEAR = {year} '
+            f'AND NOT SUBJAREA ( medi OR immu OR busi OR soci OR econ OR psyc )',
+            view="STANDARD"
+        )
+
         print(f"Year: {year} , Results count: {len(x.results)}")
+        for doc in tqdm(x.results):
+            doc_dict = doc._asdict()
+            title=doc_dict['title']
+            doi=doc_dict['doi']
+            publicationname=doc_dict['publicationName']
+            print(title, '|',doi,'|', publicationname)
+            print('-----------------------------------------------------------')
+            # print(doc_dict)
+
 
         # store the results and add the ref_docs key to store each reference
         # for doc in tqdm(x.results):
