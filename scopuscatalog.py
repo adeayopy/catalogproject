@@ -1,18 +1,19 @@
-# 4371be505eaf77e3792a20575500fb09
-
 import os
 import traceback
 from pybliometrics.scopus import ScopusSearch, AbstractRetrieval
 import json
 from tqdm import tqdm
 import pybliometrics
+import time
 
 pybliometrics.scopus.init()
 
 # NOTE: config file for pybliometrics is stored in $HOME/.config/pybliometrics.cfg
 
 if __name__ == "__main__":
-    for year in range(2020, 2021):
+    count=0
+    for year in range(2022, 2025):
+        print(year)
         # make the folder to store the data for the year
         current_path = os.getcwd()
         folder_path = os.path.join(current_path, "output", str(year))
@@ -20,29 +21,41 @@ if __name__ == "__main__":
             os.makedirs(folder_path)
 
         # get the results
-        # x = ScopusSearch(
-        #     f'ABS ( "crop disease" ) OR ABS ( "plant disease" ) OR TITLE ( "disease" ) OR TITLE ( "dataset" ) AND ABS ( "dataset" ) OR ABS ( "data" ) AND SUBJAREA ( agri ) OR SUBJAREA ( engi ) AND DOCTYPE ( "AR" ) OR DOCTYPE ( "CP" ) OR DOCTYPE ( "CR" ) OR DOCTYPE ( "RE" ) AND PUBYEAR = {year} AND NOT SUBJAREA (medi ) AND NOT SUBJAREA ( immu ) AND NOT SUBJAREA ( busi )',
-        #     view="STANDARD")
         x=ScopusSearch(
-            f'ABS ( "plant disease" OR "crop disease" AND "dataset" OR "data" OR "disease detection" OR "disease classification" OR "disease segmentation") '
-            f'OR TITLE ( "plant disease" OR "crop disease" AND "dataset" OR "data" ) '
-            f'AND SUBJAREA ( agri OR engi OR envi OR comp OR bioc ) '
-            f'AND DOCTYPE ( "AR" OR "CP" OR "CR" OR "RE" ) '
-            f'AND PUBYEAR = {year} '
-            f'AND NOT SUBJAREA ( medi OR immu OR busi OR soci OR econ OR psyc )',
+            f'ABS ( "corn" OR "maize" AND "weed" AND "detection" OR "recognition" OR "segmentation" AND "image" OR "imagery") '
+            f'OR TITLE ( "weed" AND "corn" OR "maize" ) '
+            f'AND KEY ( "corn" OR "maize" )'
+            # f'AND SUBJAREA ( agri OR engi OR envi OR comp OR bioc ) '
+            # f'AND DOCTYPE ( "AR" OR "CP" OR "CR" OR "RE" OR "DP" OR "BC") '
+            f'AND PUBYEAR = {year} ',
+            # f'AND NOT SUBJAREA ( medi OR immu OR busi OR soci OR econ OR psyc )',
             view="STANDARD"
         )
 
         print(f"Year: {year} , Results count: {len(x.results)}")
-        for doc in tqdm(x.results):
+        
+        for doc in x.results:
             doc_dict = doc._asdict()
+            dd=list(doc_dict.keys())
             title=doc_dict['title']
             doi=doc_dict['doi']
+
             publicationname=doc_dict['publicationName']
-            print(title, '|',doi,'|', publicationname)
+            authornames = doc_dict['author_names']
+            country=doc_dict['affiliation_country']
+            # print(doi)
+            time.sleep(3)  # Wait for page to load
+            if (doi != None):
+                abstract_doc = AbstractRetrieval("10.1017/wet.2023.95", view="FULL")
+                print(abstract_doc.abstract)
+            time.sleep(3)
+            # # abstract = abstract_doc.abstract if abstract_doc.abstract else "No abstract available"
+
+            print(title, '|',doi,'|', publicationname,'|', country)
+            # print(abstract)
             print('-----------------------------------------------------------')
             # print(doc_dict)
-
+    # print(dd)
 
         # store the results and add the ref_docs key to store each reference
         # for doc in tqdm(x.results):

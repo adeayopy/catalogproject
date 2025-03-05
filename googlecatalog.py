@@ -51,22 +51,20 @@ def scroll_left_pane(query, scroll_pause_time):
                     for get_url_class in get_url_classes:
                         link = get_url_class.get_attribute('data-source-url')
                         print(f"Extracted Link: {link}")
+                    # Find the "Dataset updated" div first
+                    updated_div = driver.find_element(By.XPATH, "//div[contains(text(), 'Dataset updated')]")
+                    # Get the corresponding date (following sibling span)
+                    date_updated = updated_div.find_element(By.XPATH, "./following-sibling::span").text
+                    print("Dataset updated on:", date_updated)
+                    time.sleep(2)  # Allow content to load
+                    # Find the "Dataset updated" div first
+                    find_auth = driver.find_element(By.XPATH, "//div[contains(text(), 'Authors') or contains(text(), 'authored')]")
 
-                    # div_containers = driver.find_elements(By.CLASS_NAME, "ukddFf")
+                    # Get the corresponding date (following sibling span)
+                    authors = find_auth.find_element(By.XPATH, "./following-sibling::span").text
 
-                    # for div in div_containers:
-                    #     print('ooo')
-                    #     labels = div.find_elements(By.CLASS_NAME, "pXX2tb")
-                    #     for label in labels:
-                    #         if "Dataset updated" in label:
-                    #             updated_date = div.find_element(By.CLASS_NAME, "gHk8d").text
-                    #             print(f"Dataset last updated: {updated_date}")
-
-
-                    # get_date_update = driver.find_element(By.CLASS_NAME, 'gHkX8d')
-                    # print('Date',get_date_update.text)
-                    # for date in get_date_update:
-                    #     print('Date',date.find_elements(By.CLASS_NAME, 'gHkX8d'))
+                    print("Authors:", authors)
+                    print('---------------------------------------------------------------------------')
 
 
                 except Exception as e:
