@@ -5,14 +5,25 @@ import json
 from tqdm import tqdm
 import pybliometrics
 import time
+import pandas as pd
 
 pybliometrics.scopus.init()
 
 # NOTE: config file for pybliometrics is stored in $HOME/.config/pybliometrics.cfg
 
 if __name__ == "__main__":
-    count=0
-    for year in range(2022, 2025):
+    # Define the file path
+    csv_file = "datascopus.csv"  # Change the file name as needed
+
+    # Check if the file exists
+    if not os.path.exists(csv_file):
+        # Create an empty DataFrame with column headers
+        df = pd.DataFrame(columns=["Title", "DOI", "PublicationName", "Year", "Country", "Abstract"])  
+        df.to_csv(csv_file, index=False)
+
+    df = pd.read_csv(csv_file)
+
+    for year in range(2025, 2026):
         print(year)
         # make the folder to store the data for the year
         current_path = os.getcwd()
@@ -44,17 +55,32 @@ if __name__ == "__main__":
             authornames = doc_dict['author_names']
             country=doc_dict['affiliation_country']
             # print(doi)
-            time.sleep(3)  # Wait for page to load
+            # time.sleep(3)  # Wait for page to load
             if (doi != None):
-                abstract_doc = AbstractRetrieval("10.1017/wet.2023.95", view="FULL")
-                print(abstract_doc.abstract)
-            time.sleep(3)
+                try:
+                    time.sleep(2)
+                    abstract_doc = AbstractRetrieval("10.1094/PDIS-05-23-0844-PDN", view="FULL")
+                    abstract=abstract_doc.abstract
+                except:
+                    abstract="No access"
+                # print(abstract_doc.abstract)
+            else:
+                abstract=None
+            time.sleep(2)
             # # abstract = abstract_doc.abstract if abstract_doc.abstract else "No abstract available"
+            new_item = {"Title": title, "DOI": doi ,"PublicationName": publicationname, "Year": year,"Country": country, "Abstract": abstract}  # Modify as needed
+            
+            if not ((df == pd.Series(new_item)).all(axis=1)).any():
+                new_row = pd.DataFrame([new_item])
 
-            print(title, '|',doi,'|', publicationname,'|', country)
+                # Use pd.concat() to add the new row
+                df = pd.concat([df, new_row], ignore_index=True)
+            df.to_csv(csv_file, index=False)
+            print(title, '|',doi,'|', publicationname)
             # print(abstract)
             print('-----------------------------------------------------------')
             # print(doc_dict)
+    
     # print(dd)
 
         # store the results and add the ref_docs key to store each reference
